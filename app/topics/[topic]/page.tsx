@@ -26,12 +26,16 @@ interface TopicPageProps {
 
 export default async function TopicPage({ params }: TopicPageProps) {
   const notes = await getNotes()
-  const topic = params.topic.replace(/-/g, " ")
-  const topicNotes = notes.filter((note) => note.topics.some((t) => t.toLowerCase() === topic))
+  const topicParam = params.topic.replace(/-/g, " ")
+  const actualTopic = notes
+    .flatMap((note) => note.topics)
+    .find((t) => t.toLowerCase() === topicParam.toLowerCase())
 
-  if (topicNotes.length === 0) {
+  if (!actualTopic) {
     notFound()
   }
+
+  const topicNotes = notes.filter((note) => note.topics.includes(actualTopic))
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sage-50 to-white">
@@ -45,7 +49,7 @@ export default async function TopicPage({ params }: TopicPageProps) {
         </Link>
 
         <header className="mb-12">
-          <h1 className="text-3xl font-bold mb-2 text-sage-900 font-display capitalize">{topic}</h1>
+          <h1 className="text-3xl font-bold mb-2 text-sage-900 font-display capitalize">{actualTopic}</h1>
           <p className="text-sage-700 font-serif">
             {topicNotes.length} {topicNotes.length === 1 ? "note" : "notes"} exploring this topic.
           </p>
